@@ -1,1 +1,3 @@
-# jogoteca
+# Jogoteca
+
+Webapp com Python e Flask.
