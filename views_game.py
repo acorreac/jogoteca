@@ -1,8 +1,8 @@
 from flask import render_template, request, redirect, session, flash, url_for, send_from_directory
 
 from jogoteca import app, db
-from models import Jogos, Usuarios
-from helpers import recuera_imagem, deleta_arquivo, FormularioJogo, FormularioUsuario
+from models import Jogos
+from helpers import recuera_imagem, deleta_arquivo, FormularioJogo
 import time
 
 @app.route('/')
@@ -23,7 +23,8 @@ def novo():
 def criar():
     form = FormularioJogo(request.form)
 
-    if form.validate_on_submit():
+    if not form.validate_on_submit():
+        flash('Jogo cadastrado com sucesso!')
         return redirect(url_for('novo'))
 
     nome = form.nome.data
@@ -57,30 +58,36 @@ def editar(id):
     form.nome.data = jogo.nome
     form.categoria.data = jogo.categoria
     form.console.data = jogo.console
-    
+
     capa_jogo = recuera_imagem(id)
     return render_template('editar.html', titulo = 'Editando Jogo', id = id, capa_jogo = capa_jogo, form = form)
 
 
-@app.route('/atualizar', methods=['POST',])
-def atualizar():
+@app.route('/atualizar/<int:id>', methods=['POST',])
+def atualizar(id):
     form = FormularioJogo(request.form)
+    jogo = Jogos.query.filter_by(id = request.form['id']).first()
+    jogos = Jogos.query.filter_by(nome = form.nome.data).first()
+    
+    if jogos or form.nome.data == jogo.nome:
+        flash('Jogo existente!')
+        return redirect(url_for('editar', id = id))
+    else: 
+        if form.validate_on_submit():
+            jogo = Jogos.query.filter_by(id = request.form['id']).first()
+            
+            jogo.nome = form.nome.data
+            jogo.categoria = form.categoria.data
+            jogo.console = form.console.data
 
-    if form.validate_on_submit():
-        jogo = Jogos.query.filter_by(id = request.form['id']).first()
-        jogo.nome = form.nome.data
-        jogo.categoria = form.categoria.data
-        jogo.console = form.console.data
+            db.session.add(jogo)
+            db.session.commit()
 
-        db.session.add(jogo)
-        db.session.commit()
-
-        arquivo = request.files['arquivo']
-        upload_path = app.config['UPLOAD_PATH']
-        timestemp = time.time()
-        deleta_arquivo(jogo.id)
-        arquivo.save(f'{upload_path}/capa{jogo.id}-{timestemp}.jpg')
-
+            arquivo = request.files['arquivo']
+            upload_path = app.config['UPLOAD_PATH']
+            timestemp = time.time()
+            deleta_arquivo(jogo.id)
+            arquivo.save(f'{upload_path}/capa{jogo.id}-{timestemp}.jpg')
     return redirect(url_for('index'))
 
 @app.route('/deletar/<int:id>')
@@ -93,34 +100,6 @@ def deletar(id):
     flash('Jogo deletado com sucesso!')
 
     return redirect(url_for('index'))
-
-
-@app.route('/login')
-def login():
-    proxima = request.args.get('proxima')
-    form = FormularioUsuario()
-    return render_template('login.html', proxima = proxima, form = form)
-
-@app.route('/autenticar', methods=['POST',])
-def autenticar():
-    form = FormularioUsuario(request.form)
-    usuario = Usuarios.query.filter_by(nickname = form.nickname.data).first()
-    if usuario:
-        if form.senha.data == usuario.senha:
-            session['usuario_logado'] = usuario.nickname
-            flash(usuario.nickname + ' logado com sucesso!')
-            proxima_pagina = request.form['proxima']
-            return redirect(proxima_pagina)
-    else:
-        flash('Usuário não logado.')
-        return redirect(url_for('login'))
-
-
-@app.route('/logout')
-def logout():
-     session['usuario_logado'] = None
-     flash('Logout efetuado com sucesso!')
-     return redirect(url_for('index'))
 
 @app.route('/uploads/<nome_arquivo>')
 def imagem(nome_arquivo):

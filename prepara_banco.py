@@ -29,7 +29,7 @@ TABLES = {}
 TABLES['Jogos'] = ('''
       CREATE TABLE `jogos` (
       `id` int(11) NOT NULL AUTO_INCREMENT,
-      `nome` varchar(50) NOT NULL,
+      `nome` varchar(50) NOT NULL UNIQUE,
       `categoria` varchar(40) NOT NULL,
       `console` varchar(20) NOT NULL,
       PRIMARY KEY (`id`)
