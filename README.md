@@ -13,6 +13,7 @@ Desenvolver um sistema para Internet que sirva como uma página de cadastro de j
 ![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
 ![Flask](https://img.shields.io/badge/Flask-000000?style=for-the-badge&logo=flask&logoColor=white)
 ![Bootstrap](https://img.shields.io/badge/Bootstrap-563D7C?style=for-the-badge&logo=bootstrap&logoColor=white)
+![Mysql](https://img.shields.io/badge/MySQL-005C84?style=for-the-badge&logo=mysql&logoColor=white)
 
 ## Como executar o projeto
 <h3>Para executar o projeto é necessário ter instalado em seu computador o Pyhton 3 e um sistema de gerenciamento de dados(Mysql, MariaDB etc)</h3>
